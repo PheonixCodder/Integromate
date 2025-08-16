@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 const font = DM_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Integromate.',
+  title: 'Integromate',
   description: 'Automate Your Work With Integromate.',
 }
 
