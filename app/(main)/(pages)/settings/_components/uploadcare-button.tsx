@@ -12,7 +12,7 @@ const UploadCareButton = ({ onUpload }: Props) => {
   const router = useRouter();
 
   const handleChange = async (event: any) => {
-    const files = event.detail?.files || [];
+    const files = event.successEntries || [];
     if (files.length > 0) {
       const file = await onUpload(files[0].cdnUrl);
       if (file) {
@@ -26,8 +26,8 @@ const UploadCareButton = ({ onUpload }: Props) => {
       <FileUploaderRegular
         sourceList="local, camera, facebook, gdrive"
         classNameUploader="uc-light"
-        pubkey="a9428ff5ff90ae7a64eb"
-        onChange={handleChange}
+        pubkey="6c03f9d0c6b6a5bb1ead"
+        onCommonUploadSuccess={handleChange}
       />
     </div>
   );

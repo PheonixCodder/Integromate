@@ -1,15 +1,15 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { currentUser } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 
 export const onPaymentDetails = async () => {
-  const user = await currentUser()
+  const {userId} = await auth()
 
-  if (user) {
+  if (userId) {
     const connection = await db.user.findFirst({
       where: {
-        clerkId: user.id,
+        clerkId: userId,
       },
       select: {
         tier: true,
@@ -17,7 +17,7 @@ export const onPaymentDetails = async () => {
       },
     })
 
-    if (user) {
+    if (userId) {
       return connection
     }
   }

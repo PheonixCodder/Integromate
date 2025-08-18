@@ -1,11 +1,11 @@
 import { CONNECTIONS } from '@/lib/constant'
 import React from 'react'
 import ConnectionCard from './_components/connection-card'
-import { currentUser } from '@clerk/nextjs'
 import { onDiscordConnect } from './_actions/discord-connection'
 import { onNotionConnect } from './_actions/notion-connection'
 import { onSlackConnect } from './_actions/slack-connection'
 import { getUserData } from './_actions/get-user'
+import { auth } from '@clerk/nextjs/server'
 
 type Props = {
   searchParams?: { [key: string]: string | undefined }
@@ -31,7 +31,7 @@ const Connections = async (props: Props) => {
     bot_user_id,
     team_id,
     team_name,
-  } = props.searchParams ?? {
+  } = await props.searchParams ?? {
     webhook_id: '',
     webhook_name: '',
     webhook_url: '',
@@ -52,17 +52,16 @@ const Connections = async (props: Props) => {
     team_name: '',
   }
 
-  const user = await currentUser()
-  if (!user) return null
+  const {userId} = await auth()
+  if (!userId) return null
 
   const onUserConnections = async () => {
-    console.log(database_id)
     await onDiscordConnect(
       channel_id!,
       webhook_id!,
       webhook_name!,
       webhook_url!,
-      user.id,
+      userId,
       guild_name!,
       guild_id!
     )
@@ -72,7 +71,7 @@ const Connections = async (props: Props) => {
       workspace_icon!,
       workspace_name!,
       database_id!,
-      user.id
+      userId
     )
 
     await onSlackConnect(
@@ -83,15 +82,15 @@ const Connections = async (props: Props) => {
       bot_user_id!,
       team_id!,
       team_name!,
-      user.id
+      userId
     )
 
     const connections: any = {}
 
-    const user_info = await getUserData(user.id)
+    const user_info = await getUserData(userId)
 
     //get user info with all connections
-    user_info?.connections.map((connection) => {
+    user_info?.connections.map((connection:any) => {
       connections[connection.type] = true
       return (connections[connection.type] = true)
     })

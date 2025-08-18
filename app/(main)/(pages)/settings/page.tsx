@@ -2,20 +2,20 @@ import ProfileForm from '@/components/forms/profile-form'
 import React from 'react'
 import ProfilePicture from './_components/profile-picture'
 import { db } from '@/lib/db'
-import { currentUser } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 
 type Props = {}
 
 const Settings = async (props: Props) => {
-  const authUser = await currentUser()
-  if (!authUser) return null
+  const {userId} = await auth()
+  if (!userId) return null
 
-  const user = await db.user.findUnique({ where: { clerkId: authUser.id } })
+  const user = await db.user.findUnique({ where: { clerkId: userId } })
   const removeProfileImage = async () => {
     'use server'
     const response = await db.user.update({
       where: {
-        clerkId: authUser.id,
+        clerkId: userId,
       },
       data: {
         profileImage: '',
@@ -26,7 +26,7 @@ const Settings = async (props: Props) => {
 
   const uploadProfileImage = async (image: string) => {
     'use server'
-    const id = authUser.id
+    const id = userId
     const response = await db.user.update({
       where: {
         clerkId: id,
@@ -44,7 +44,7 @@ const Settings = async (props: Props) => {
 
     const updateUser = await db.user.update({
       where: {
-        clerkId: authUser.id,
+        clerkId: userId,
       },
       data: {
         name,

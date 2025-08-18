@@ -1,8 +1,8 @@
 import React from 'react'
 import Stripe from 'stripe'
-import { currentUser } from '@clerk/nextjs'
 import { db } from '@/lib/db'
 import BillingDashboard from './_components/billing-dashboard'
+import { auth } from '@clerk/nextjs/server'
 
 type Props = {
   searchParams?: { [key: string]: string | undefined }
@@ -15,15 +15,15 @@ const Billing = async (props: Props) => {
   if (session_id) {
     const stripe = new Stripe(process.env.STRIPE_SECRET!, {
       typescript: true,
-      apiVersion: '2023-10-16',
     })
 
+    const { userId } = await auth()
+
     const session = await stripe.checkout.sessions.listLineItems(session_id)
-    const user = await currentUser()
-    if (user) {
+    if (userId) {
       await db.user.update({
         where: {
-          clerkId: user.id,
+          clerkId: userId,
         },
         data: {
           tier: session.data[0].description,
