@@ -8,6 +8,7 @@ export const onCreateNodesEdges = async (
   edges: string,
   flowPath: string
 ) => {
+  console.log(flowId, nodes, edges, flowPath)
   const flow = await db.workflows.update({
     where: {
       id: flowId,

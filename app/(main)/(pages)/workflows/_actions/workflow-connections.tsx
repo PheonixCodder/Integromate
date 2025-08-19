@@ -2,6 +2,7 @@
 import { Option } from '@/components/ui/multiple-selector'
 import { db } from '@/lib/db'
 import { auth, currentUser } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
 
 export const getGoogleListener = async () => {
   const { userId } = await auth()
@@ -21,7 +22,8 @@ export const getGoogleListener = async () => {
 }
 
 export const onFlowPublish = async (workflowId: string, state: boolean) => {
-  console.log(state)
+  console.log(state);
+  
   const published = await db.workflows.update({
     where: {
       id: workflowId,
@@ -29,11 +31,14 @@ export const onFlowPublish = async (workflowId: string, state: boolean) => {
     data: {
       publish: state,
     },
-  })
+  });
 
-  if (published.publish) return 'Workflow published'
-  return 'Workflow unpublished'
-}
+  // Invalidate the cache so the Server Component re-renders with updated data
+  revalidatePath('/workflows');
+
+  return published.publish ? 'Workflow published' : 'Workflow unpublished';
+};
+
 
 export const onCreateNodeTemplate = async (
   content: string,

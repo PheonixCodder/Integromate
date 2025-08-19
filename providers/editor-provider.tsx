@@ -68,7 +68,7 @@ const editorReducer = (
       if (state.history.currentIndex < state.history.history.length - 1) {
         const nextIndex = state.history.currentIndex + 1
         const nextEditorState = { ...state.history.history[nextIndex] }
-        const redoState = {
+        return {
           ...state,
           editor: nextEditorState,
           history: {
@@ -76,7 +76,6 @@ const editorReducer = (
             currentIndex: nextIndex,
           },
         }
-        return redoState
       }
       return state
 
@@ -84,7 +83,7 @@ const editorReducer = (
       if (state.history.currentIndex > 0) {
         const prevIndex = state.history.currentIndex - 1
         const prevEditorState = { ...state.history.history[prevIndex] }
-        const undoState = {
+        return {
           ...state,
           editor: prevEditorState,
           history: {
@@ -92,19 +91,32 @@ const editorReducer = (
             currentIndex: prevIndex,
           },
         }
-        return undoState
       }
       return state
 
-    case 'LOAD_DATA':
+    case 'LOAD_DATA': {
+      const newEditor: Editor = {
+        ...state.editor,
+        elements: action.payload.elements || initialEditorState.elements,
+        edges: action.payload.edges,
+        selectedNode: state.editor.selectedNode, // keep selection unless you want to reset
+      }
+
+      const newHistory = [
+        ...state.history.history.slice(0, state.history.currentIndex + 1),
+        newEditor,
+      ]
+
       return {
         ...state,
-        editor: {
-          ...state.editor,
-          elements: action.payload.elements || initialEditorState.elements,
-          edges: action.payload.edges,
+        editor: newEditor,
+        history: {
+          history: newHistory,
+          currentIndex: newHistory.length - 1,
         },
       }
+    }
+
     case 'SELECTED_ELEMENT':
       return {
         ...state,
@@ -113,10 +125,35 @@ const editorReducer = (
           selectedNode: action.payload.element,
         },
       }
+
+    case 'UPDATE_NODES_EDGES': {
+      const newEditor: Editor = {
+        ...state.editor,
+        elements: action.payload.elements,
+        edges: action.payload.edges,
+        selectedNode: state.editor.selectedNode, // preserve selection
+      }
+
+      const newHistory = [
+        ...state.history.history.slice(0, state.history.currentIndex + 1),
+        newEditor,
+      ]
+
+      return {
+        ...state,
+        editor: newEditor,
+        history: {
+          history: newHistory,
+          currentIndex: newHistory.length - 1,
+        },
+      }
+    }
+
     default:
       return state
   }
 }
+
 
 export type EditorContextData = {
   previewMode: boolean

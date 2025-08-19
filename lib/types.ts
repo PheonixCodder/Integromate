@@ -69,6 +69,7 @@ export type EditorActions =
         }[]
       }
     }
+      | { type: 'UPDATE_NODES_EDGES'; payload: { elements: EditorNodeType[]; edges: Edge[] } }
   | {
       type: 'UPDATE_NODE'
       payload: {
